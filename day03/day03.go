@@ -22,7 +22,7 @@ func Run() {
 	scanner := bufio.NewScanner(file)
 	var text string
 	for scanner.Scan() {
-		text += scanner.Text() + "\n"
+		text += scanner.Text()
 	}
 	utils.Check(scanner.Err())
 	var sum int
