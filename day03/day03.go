@@ -35,31 +35,39 @@ func Run() {
 				for j := start; j < start+8 && j < len(text); j++ {
 					if text[j] == ')' {
 						numberPart := text[start:j]
-						parts := strings.Split(numberPart, ",")
-						if len(parts) != 2 {
+						result, err := parseAndMultiply(numberPart)
+						if err != nil {
 							continue
 						}
-						firstNum, err1 := strconv.Atoi(parts[0])
-						secondNum, err2 := strconv.Atoi(parts[1])
-						if err1 != nil || err2 != nil {
-							continue
-						}
-						sum += firstNum * secondNum
+						sum += result
 						break
 					}
 				}
 			} else if text[i:i+7] == "don't()" {
 				mulEnabled = false
-				i += 5
+				i += 6
 			}
 		} else {
 			if text[i:i+4] == "do()" {
 				mulEnabled = true
-				i += 2
+				i += 3
 			}
 		}
 	}
 
 	fmt.Printf("Answer to second puzzle: %d\n", sum)
 
+}
+
+func parseAndMultiply(numbersPart string) (int, error) {
+	parts := strings.Split(numbersPart, ",")
+	if len(parts) != 2 {
+		return 0, fmt.Errorf("invalid input")
+	}
+	firstNum, err1 := strconv.Atoi(parts[0])
+	secondNum, err2 := strconv.Atoi(parts[1])
+	if err1 != nil || err2 != nil {
+		return 0, fmt.Errorf("invalid input")
+	}
+	return firstNum * secondNum, nil
 }
