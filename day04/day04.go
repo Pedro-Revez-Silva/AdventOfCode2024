@@ -1,6 +1,7 @@
 package day04
 
 import (
+	"AdventOfCode2024/utils"
 	"fmt"
 	"io"
 	"log"
@@ -21,9 +22,8 @@ func Run() {
 func puzzle1() {
 	wordToSearch := "XMAS"
 	file, err := os.Open("input4.txt")
-	if err != nil {
-		log.Fatal(err)
-	}
+	utils.Check(err)
+
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
