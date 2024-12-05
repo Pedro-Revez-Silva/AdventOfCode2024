@@ -52,7 +52,6 @@ func puzzle1() {
 	var sortedUpdates [][]int
 	for _, invalidUpdate := range invalidUpdates {
 		sortedUpdate := sortUpdate(invalidUpdate, rules)
-		fmt.Println("Is valid Update Sequence?:", isValidUpdateSequence(sortedUpdate, rules), invalidUpdate, sortedUpdate)
 		sortedUpdates = append(sortedUpdates, sortedUpdate)
 	}
 
