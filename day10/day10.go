@@ -3,10 +3,7 @@ package day10
 import (
 	"AdventOfCode2024/utils"
 	"fmt"
-	"strings"
 )
-
-var directions = []utils.Position{{0, -1}, {1, 0}, {0, 1}, {-1, 0}}
 
 func Run() {
 	fmt.Println("\nDay 10:")
@@ -15,120 +12,80 @@ func Run() {
 	puzzle2(grid)
 }
 
-func findTrailheads(grid []string) []utils.Position {
-	var trailheads []utils.Position
-	for y := range grid {
-		for x := range grid[y] {
-			if grid[y][x] == '0' {
-				trailheads = append(trailheads, utils.Position{X: x, Y: y})
-			}
+func trailsCounter(grid []string, pos utils.Position, val int, reached map[utils.Position]bool) int {
+	if pos.Y < 0 || pos.X < 0 || pos.Y >= len(grid) || pos.X >= len(grid[0]) {
+		return 0
+	}
+	if int(grid[pos.Y][pos.X]-'0') != val {
+		return 0
+	}
+	if val == 9 {
+		if reached[pos] {
+			return 0
 		}
+		reached[pos] = true
+		return 1
 	}
-	return trailheads
-}
-
-func getNeighbors(p utils.Position, grid []string) []utils.Position {
-	var neighbors []utils.Position
-	for _, dir := range directions {
-		newX, newY := p.X+dir.X, p.Y+dir.Y
-		if newY >= 0 && newY < len(grid) && newX >= 0 && newX < len(grid[0]) {
-			neighbors = append(neighbors, utils.Position{X: newX, Y: newY})
-		}
-	}
-	return neighbors
-}
-
-func getHeight(p utils.Position, grid []string) int {
-	return int(grid[p.Y][p.X] - '0')
-}
-
-func dfs(pos utils.Position, currentHeight int, path map[utils.Position]bool, peaks map[utils.Position]bool, grid []string) {
-	if getHeight(pos, grid) == 9 {
-		peaks[pos] = true
-		return
-	}
-
-	for _, next := range getNeighbors(pos, grid) {
-		nextHeight := getHeight(next, grid)
-		if nextHeight == currentHeight+1 && !path[next] {
-			newPath := make(map[utils.Position]bool)
-			for k, v := range path {
-				newPath[k] = v
-			}
-			newPath[next] = true
-			dfs(next, nextHeight, newPath, peaks, grid)
-		}
-	}
-}
-
-func findReachablePeaks(start utils.Position, grid []string) map[utils.Position]bool {
-	peaks := make(map[utils.Position]bool)
-	path := map[utils.Position]bool{start: true}
-	dfs(start, 0, path, peaks, grid)
-	return peaks
+	return trailsCounter(grid, utils.Position{X: pos.X - 1, Y: pos.Y}, val+1, reached) +
+		trailsCounter(grid, utils.Position{X: pos.X + 1, Y: pos.Y}, val+1, reached) +
+		trailsCounter(grid, utils.Position{X: pos.X, Y: pos.Y - 1}, val+1, reached) +
+		trailsCounter(grid, utils.Position{X: pos.X, Y: pos.Y + 1}, val+1, reached)
 }
 
 func puzzle1(grid []string) {
-	trailheads := findTrailheads(grid)
 	totalScore := 0
 
-	for _, trailhead := range trailheads {
-		peaks := findReachablePeaks(trailhead, grid)
-		totalScore += len(peaks)
+	for y := range grid {
+		for x := range grid[y] {
+			if grid[y][x] == '0' {
+				reached := make(map[utils.Position]bool)
+				totalScore += trailsCounter(grid, utils.Position{X: x, Y: y}, 0, reached)
+			}
+		}
 	}
 
 	fmt.Println("Answer to puzzle 1:", totalScore)
 }
 
-func getTrailString(path []utils.Position) string {
-	var parts []string
-	for _, p := range path {
-		parts = append(parts, fmt.Sprintf("%d,%d", p.X, p.Y))
-	}
-	return strings.Join(parts, "|")
-}
-
-func dfsTrails(pos utils.Position, currentHeight int, path []utils.Position, trails map[string]bool, grid []string) {
-	if getHeight(pos, grid) == 9 {
-		trail := getTrailString(path)
-		trails[trail] = true
-		return
+func pathCounter(grid []string, pos utils.Position, val int, visited map[utils.Position]bool) int {
+	if pos.Y < 0 || pos.X < 0 || pos.Y >= len(grid) || pos.X >= len(grid[0]) {
+		return 0
 	}
 
-	for _, next := range getNeighbors(pos, grid) {
-		nextHeight := getHeight(next, grid)
-		if nextHeight == currentHeight+1 {
-			alreadyVisited := false
-			for _, p := range path {
-				if p == next {
-					alreadyVisited = true
-					break
-				}
-			}
-			if !alreadyVisited {
-				newPath := make([]utils.Position, len(path))
-				copy(newPath, path)
-				newPath = append(newPath, next)
-				dfsTrails(next, nextHeight, newPath, trails, grid)
-			}
-		}
+	if int(grid[pos.Y][pos.X]-'0') != val {
+		return 0
 	}
-}
 
-func countUniqueTrails(start utils.Position, grid []string) int {
-	trails := make(map[string]bool)
-	initialPath := []utils.Position{start}
-	dfsTrails(start, 0, initialPath, trails, grid)
-	return len(trails)
-}
+	if visited[pos] {
+		return 0
+	}
 
+	if val == 9 {
+		return 1
+	}
+
+	visited[pos] = true
+
+	paths := pathCounter(grid, utils.Position{X: pos.X - 1, Y: pos.Y}, val+1, visited) +
+		pathCounter(grid, utils.Position{X: pos.X + 1, Y: pos.Y}, val+1, visited) +
+		pathCounter(grid, utils.Position{X: pos.X, Y: pos.Y - 1}, val+1, visited) +
+		pathCounter(grid, utils.Position{X: pos.X, Y: pos.Y + 1}, val+1, visited)
+
+	visited[pos] = false
+
+	return paths
+}
 func puzzle2(grid []string) {
-	trailheads := findTrailheads(grid)
 	totalRating := 0
 
-	for _, trailhead := range trailheads {
-		rating := countUniqueTrails(trailhead, grid)
-		totalRating += rating
+	for y := range grid {
+		for x := range grid[y] {
+			if grid[y][x] == '0' {
+				visited := make(map[utils.Position]bool)
+				rating := pathCounter(grid, utils.Position{X: x, Y: y}, 0, visited)
+				totalRating += rating
+			}
+		}
 	}
 
 	fmt.Println("Answer to puzzle 2:", totalRating)
