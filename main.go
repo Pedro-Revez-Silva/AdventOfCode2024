@@ -1,7 +1,7 @@
 package main
 
 import (
-	"AdventOfCode2024/day11"
+	"AdventOfCode2024/day12"
 	"fmt"
 	"time"
 )
@@ -38,5 +38,6 @@ func main() {
 	//timeFunction("Day 8", day08.Run)
 	//timeFunction("Day 9", day09.Run)
 	//timeFunction("Day 10", day10.Run)
-	timeFunction("Day 11", day11.Run)
+	//timeFunction("Day 11", day11.Run)
+	timeFunction("Day 12", day12.Run)
 }
